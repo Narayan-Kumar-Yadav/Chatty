@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helper functions
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// True when the request comes from a signed-in Firebase Auth user.
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    /// True when the calling user is listed in the room's members array.
+    function isMember(roomId) {
+      return isAuthed()
+        && request.auth.uid in
+             get(/databases/$(database)/documents/rooms/$(roomId)).data.members;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // users/{userId}
+    //   • Any authenticated user can read any profile (needed for search).
+    //   • Only the profile owner can write their own document.
+    // ─────────────────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read:  if isAuthed();
+      allow write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // usernames/{username}
+    //   • Any authenticated user can check whether a username exists (read).
+    //   • Only the uid stored in the document may create / update / delete it.
+    //     This, combined with the transaction in claimUsername(), prevents a
+    //     malicious client from overwriting another user's username claim.
+    // ─────────────────────────────────────────────────────────────────────────
+    match /usernames/{username} {
+      allow read: if isAuthed();
+
+      // create: the document must declare the caller as the owner
+      allow create: if isAuthed()
+                    && request.resource.data.uid == request.auth.uid;
+
+      // update: only the existing owner may reassign (e.g. username change)
+      allow update: if isAuthed()
+                    && resource.data.uid == request.auth.uid;
+
+      // delete: only the existing owner may release a username
+      allow delete: if isAuthed()
+                    && resource.data.uid == request.auth.uid;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // rooms/{roomId}
+    //   • Read/update: must be a member.
+    //   • Create: caller must include themselves in members.
+    //   • Delete: never (rooms persist; add soft-delete field if needed).
+    // ─────────────────────────────────────────────────────────────────────────
+    match /rooms/{roomId} {
+      allow read:   if isAuthed()
+                    && request.auth.uid in resource.data.members;
+
+      allow create: if isAuthed()
+                    && request.auth.uid in request.resource.data.members;
+
+      allow update: if isAuthed()
+                    && request.auth.uid in resource.data.members
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastMessageAt', 'updatedAt']);
+
+      allow delete: if false;
+
+      // ───────────────────────────────────────────────────────────────────────
+      // rooms/{roomId}/messages/{messageId}
+      //   • Read: room members only.
+      //   • Create: room members; senderId must match the caller.
+      //   • Update: only allow modifications to the readBy array.
+      //   • Delete: room members (allows clearing chat).
+      // ───────────────────────────────────────────────────────────────────────
+      match /messages/{messageId} {
+        allow read:          if isMember(roomId);
+        allow create:        if isMember(roomId)
+                             && request.resource.data.senderId == request.auth.uid;
+        allow update:        if isMember(roomId)
+                             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'deliveredTo']);
+        allow delete:        if isMember(roomId);
+      }
+    }
+  }
+}

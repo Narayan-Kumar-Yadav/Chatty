@@ -1,0 +1,36 @@
+[0m[0m
+[0m[4mD:\Chatty\chatty\src\app\(app)\profile\page.tsx[24m[0m
+[0m  [2m68:22[22m  [31merror[39m  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mD:\Chatty\chatty\src\components\chat\ChatHeader.tsx[24m[0m
+[0m  [2m51:14[22m  [33mwarning[39m  'error' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m70:14[22m  [33mwarning[39m  'error' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m88:14[22m  [33mwarning[39m  'error' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mD:\Chatty\chatty\src\components\chat\NewChatModal.tsx[24m[0m
+[0m  [2m36:7[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mD:\Chatty\chatty\src\components\chat\NewChatModal.tsx:36:7[0m
+[0m  34 |   useEffect(() => {[0m
+[0m  35 |     if (isOpen) {[0m
+[0m> 36 |       setIsRendered(true);[0m
+[0m     |       ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  37 |[0m
+[0m  38 |       const frame = window.requestAnimationFrame(() => {[0m
+[0m  39 |         setIsVisible(true);  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mD:\Chatty\chatty\src\components\profile\ProfileForm.tsx[24m[0m
+[0m   [2m20:11[22m  [31merror[39m  An interface declaring no members is equivalent to its supertype  [2m@typescript-eslint/no-empty-object-type[22m[0m
+[0m  [2m288:17[22m  [31merror[39m  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`   [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mD:\Chatty\chatty\src\hooks\useChat.ts[24m[0m
+[0m  [2m4:21[22m  [33mwarning[39m  'useRef' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[31m[1m✖ 8 problems (4 errors, 4 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

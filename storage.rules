@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    match /avatars/{userId} {
+      // Anyone can read avatars
+      allow read: if true;
+      // Only the user themselves can upload an avatar
+      allow write: if isAuthed() && request.auth.uid == userId
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+
+    match /chat-media/{roomId}/{filename} {
+      // Any authenticated user can read (in practice, Firebase SDK checks signed URLs anyway, but good to restrict)
+      allow read: if isAuthed();
+      // Any authenticated user can upload
+      allow write: if isAuthed()
+                    && request.resource.size < 5 * 1024 * 1024; // Max 5MB
+    }
+  }
+}
