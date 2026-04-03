@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3000;
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -32,11 +32,11 @@ io.on("connection", (socket) => {
     // Immediately send back the current presence of these users
     const currentlyOnline = Array.from(activeUsers.values());
     const syncMap: Record<string, { isOnline: boolean }> = {};
-    
+
     userIds.forEach((id) => {
       syncMap[id] = { isOnline: currentlyOnline.includes(id) };
     });
-    
+
     socket.emit("presence_sync", syncMap);
   });
 
@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
     if (userId) {
       console.log(`[Socket] user_offline (disconnect): ${userId}`);
       activeUsers.delete(socket.id);
-      
+
       // If the user doesn't have other active sockets, mark offline
       const hasOtherSockets = Array.from(activeUsers.values()).includes(userId);
       if (!hasOtherSockets) {
