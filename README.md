@@ -48,6 +48,9 @@
 
 ## ✨ Features
 
+<img width="1539" height="909" alt="Screenshot 2026-04-04 115855" src="https://github.com/user-attachments/assets/519be5ec-7a92-4b8c-9510-7c2d9247211a" />
+
+
 ### 💬 Real-Time Messaging
 
 - **Hybrid messaging pipeline** — messages are written to Firestore for persistence and simultaneously emitted via Socket.io for instant delivery, eliminating polling entirely.
